@@ -24,26 +24,51 @@
 # position :: a Vector of length 2
 # render :: (canvas) ->
 #   Draw the actor on the given canvas.
-# update_position :: (timedelta) ->
-#   Update the actor's position based on the given timedelta
 class Actor
-    constructor: (@radius, @position) ->
-
+    constructor: (@radius, @position, @velocity = 0) ->
     render: (canvas) ->
-    update_position: ->
+    update_position: (timedelta) ->
 
 class Asteroid extends Actor
     render: (canvas) ->
+        console.log canvas
         [x, y] = @position.elements
         canvas.getContext('2d').fillRect(
             x - @radius,
             y - @radius,
             @radius,
             @radius)
+        
 
-$('#maincanvas').click(->
-    coords = Vector.Random(2).multiply(400)
-    asteroid = new Asteroid(20, coords)
-    asteroid.render(this)
+asteroids = []
+random_asteroid = (size = 20, bounds = 400, speed = 100) ->
+    coords = Vector.Random(2).multiply(bounds)
+    velocity = Vector.Random(2).toUnitVector().x(speed)
+    return new Asteroid(size, coords, velocity)
+
+
+
+canvas = $('#maincanvas').get(0)
+# Set the regular update timer
+last_update_time = Date.now()
+update_fxn = ->
+    now = Date.now()
+    timedelta = (now - last_update_time) / 1000
+    last_update_time = now
+
+    asteroids.forEach((elem) ->
+        elem.position = elem.position.add(elem.velocity.x(timedelta))
+        elem.position.elements[0] %= 600    # hardcoded canvas size
+        elem.position.elements[1] %= 400    # hardcoded canvas size
+        )
+    # Clear canvas by updating its dimensions:
+    canvas.width = canvas.width
+
+    asteroids.forEach((elem) -> elem.render(canvas))
+
+setInterval(update_fxn, 20)
+
+# Add an asteroid on every click, for debugging
+$(canvas).click(->
+    asteroids.push(random_asteroid())
 )
-
