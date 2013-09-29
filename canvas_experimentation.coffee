@@ -35,7 +35,6 @@ random_position_in_canvas = ->
 class Actor
     constructor: (@radius, @position, @velocity = Vector.Zero(2)) ->
     render: (canvas) ->
-    update_position: (timedelta) ->
 
 class Asteroid extends Actor
     render: (context) ->
@@ -74,6 +73,19 @@ random_asteroid = (size = 20, speed = 100) ->
 ship = new Ship(10, random_position_in_canvas())
 actors.push(ship)
 
+collision_check = (a,b) ->
+    distance = a.position.subtract(b.position).modulus()
+    if distance >= (a.radius + b.radius) / 2
+        return
+    if a == b
+        return
+    if a instanceof Asteroid and b instanceof Asteroid
+        return
+    if a instanceof Ship or b instanceof Ship
+        actors = _(actors).without(a,b)
+        alert 'Game Over'
+    actors = _(actors).without(a,b)
+
 # Set the regular update timer
 last_update_time = Date.now()
 update_fxn = ->
@@ -93,12 +105,20 @@ update_fxn = ->
     # Clear canvas by updating its dimensions:
     canvas.width = canvas.width
 
+    # Re-render:
     actors.forEach((elem) ->
         context = canvas.getContext('2d')
         context.save()
         elem.render(context)
         context.restore()
         )
+
+    # Check for collisions:
+    # Just doing the naive n^2 for now.
+    for i in [0 ... actors.length]
+        for j in [i+1 ... actors.length]
+            collision_check(actors[i], actors[j])
+        
 
 setInterval(update_fxn, 20)
 
@@ -118,3 +138,25 @@ keypress.combo('up', -> modify_ship_speed(5))
 keypress.combo('down', -> modify_ship_speed(-5))
 keypress.combo('left', -> rotate_ship(-0.1))
 keypress.combo('right', -> rotate_ship(0.1))
+
+# Set up the zaps.
+class Bullet extends Actor
+    constructor: (position, velocity, @orientation) ->
+        super(5, position, velocity)
+
+    render: (context) ->
+        [x,y] = @position.elements
+        context.translate(x,y)
+        context.fillStyle = 'rgb(200,0,0)'
+        context.arc(0,0,@radius,0,2 * Math.PI)
+        context.fill()
+
+keypress.combo 'space', ->
+    # Create a bullet in front of the ship,
+    # with velocity equal to ship velocity, plus an extra push in the orientation of the ship.
+    velocity = ship.velocity.add(ship.orientation.toUnitVector().x(200))
+    delta = ship.orientation.toUnitVector().x(20)
+    bullet = new Bullet(ship.position.add(delta),
+        velocity,
+        ship.orientation)
+    actors.push(bullet)
