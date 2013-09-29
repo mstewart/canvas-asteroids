@@ -161,7 +161,7 @@
 
   setInterval(update_fxn, 20);
 
-  $(canvas).click(function() {
+  $('button').click(function() {
     return actors.push(random_asteroid());
   });
 

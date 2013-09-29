@@ -123,7 +123,7 @@ update_fxn = ->
 setInterval(update_fxn, 20)
 
 # Add an asteroid on every click, for debugging
-$(canvas).click(->
+$('button').click(->
     actors.push(random_asteroid())
 )
 
