@@ -49,8 +49,8 @@ class Ship extends Actor
     orientation: $V([0,1])
     render: (context) ->
         [x, y] = @position.elements
-        context.fillStyle = 'rgb(0,0,200)'
         context.translate(x, y)
+        context.fillStyle = 'rgb(0,0,200)'
 
         rotation_angle = @orientation.angleFrom($V([0,1]))
         if (@orientation.elements[0] > 0)
@@ -147,6 +147,7 @@ class Bullet extends Actor
     render: (context) ->
         [x,y] = @position.elements
         context.translate(x,y)
+        context.beginPath()
         context.fillStyle = 'rgb(200,0,0)'
         context.arc(0,0,@radius,0,2 * Math.PI)
         context.fill()
