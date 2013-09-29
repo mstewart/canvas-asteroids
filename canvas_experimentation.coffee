@@ -53,17 +53,6 @@ class Ship extends Actor
         context.fillStyle = 'rgb(0,0,200)'
         context.translate(x, y)
 
-        context.save()
-        context.fillStyle = 'rgb(200,0,0)'
-        [or_x, or_y] = @orientation.x(2 * @radius).elements
-        context.beginPath()
-        context.moveTo(0,0)
-        context.lineTo(or_x, or_y)
-        context.lineTo(or_x + 1, or_y + 1)
-        context.lineTo(0,0)
-        context.fill()
-        context.restore()
-
         rotation_angle = @orientation.angleFrom($V([0,1]))
         if (@orientation.elements[0] > 0)
             rotation_angle *= -1
@@ -124,12 +113,6 @@ modify_ship_speed = (scaling_factor) ->
         ship.orientation.x(scaling_factor))
 rotate_ship = (angle) ->
     ship.orientation = ship.orientation.rotate(angle, Vector.Zero(2))
-    console.log ship.orientation
-    [x,y] = ship.orientation
-    rotation_angle = ship.orientation.angleFrom($V([0,1]))
-    if (x < 0)
-        rotation_angle = rotation_angle.x(-1)
-    console.log rotation_angle
     
 keypress.combo('up', -> modify_ship_speed(5))
 keypress.combo('down', -> modify_ship_speed(-5))
